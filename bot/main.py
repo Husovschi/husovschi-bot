@@ -1,43 +1,46 @@
 import os
-from telegram import Update
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext
+from telethon import TelegramClient, events
 
+from langchain.schema import HumanMessage
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
-from langchain_community.llms import Ollama
+from langchain_community.chat_models import ChatOllama
 
-# Read the Telegram bot token and Ollama API endpoint from environment variables
-TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN') or 'your_fallback_token'
-OLLAMA_API_ENDPOINT = os.getenv('OLLAMA_API_ENDPOINT') or 'your_fallback_endpoint'
+api_id = 'api_id'
+api_hash = 'api_hash'
+bot_token = 'bot_token'
+ollama_api_endpoint = os.getenv('OLLAMA_API_ENDPOINT') or 'http://localhost:11434'
+
+# Create the client and connect
+client = TelegramClient('bot', api_id, api_hash).start(bot_token=bot_token)
+
 
 # Initialize the Ollama object with the API endpoint and model name
-ollama = Ollama(
-    base_url=OLLAMA_API_ENDPOINT,
-    callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]),
-    model="mistral")
+chat_model = ChatOllama(
+    model="phi",
+    base_url=ollama_api_endpoint
+)
 
-async def start(update: Update, context: CallbackContext) -> None:
-    """
-    Sends a welcome message when the /start command is issued.
-    """
-    await update.message.reply_text('Ask me any question.')
+messages = []
+@client.on(events.NewMessage(chats=None))
+async def handler(event):
+    if event.is_group:  # Check if the message is in a group
+        if event.message.mentioned:  # Check if the bot is mentioned
+            # Remove the bot's mention from the message
+            message_text = event.message.message
+            bot_username = (await client.get_me()).username
+            message_without_mention = message_text.replace(f"@{bot_username}", "").strip()
+            # Create a HumanMessage object for the new message
+            new_message = HumanMessage(
+                content=message_without_mention
+            )
 
-async def handle_message(update: Update, context: CallbackContext) -> None:
-    """
-    Handles incoming messages by forwarding them to the Ollama API
-    and replying with the generated answer.
-    """
-    question = update.message.text
-    answer = ollama(question)
-    await update.message.reply_text(answer)
+            # Append the new HumanMessage object to the messages list
+            messages.append(new_message)
 
-if __name__ == '__main__':
-    # Create the bot application with the specified token
-    application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
+            # Generate a response with the updated messages list
+            answer = chat_model(messages)
+            print(answer.content)
+            await event.respond(answer.content)
 
-    # Register handlers for different commands and messages
-    application.add_handler(CommandHandler("start", start))
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-
-    # Start polling messages from Telegram
-    application.run_polling()
+client.run_until_disconnected()

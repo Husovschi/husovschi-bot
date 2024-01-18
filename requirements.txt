@@ -1,4 +1,4 @@
 requests
-python-telegram-bot
+telethon
 langchain
 langchain-community
