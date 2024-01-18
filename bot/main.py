@@ -24,23 +24,24 @@ chat_model = ChatOllama(
 messages = []
 @client.on(events.NewMessage(chats=None))
 async def handler(event):
-    if event.is_group:  # Check if the message is in a group
-        if event.message.mentioned:  # Check if the bot is mentioned
-            # Remove the bot's mention from the message
-            message_text = event.message.message
-            bot_username = (await client.get_me()).username
-            message_without_mention = message_text.replace(f"@{bot_username}", "").strip()
-            # Create a HumanMessage object for the new message
-            new_message = HumanMessage(
-                content=message_without_mention
-            )
+    if event.is_group and event.message.mentioned:  # Check if the bot is mentioned
+        # Remove the bot's mention from the message
+        message_text = event.message.message
+        bot_username = (await client.get_me()).username
+        message_text = message_text.replace(f"@{bot_username}", "").strip()
+    else:
+        message_text = event.message.message
+        # Create a HumanMessage object for the new message
+        new_message = HumanMessage(
+            content=message_text
+        )
 
-            # Append the new HumanMessage object to the messages list
-            messages.append(new_message)
+        # Append the new HumanMessage object to the messages list
+        messages.append(new_message)
 
-            # Generate a response with the updated messages list
-            answer = chat_model(messages)
-            print(answer.content)
-            await event.respond(answer.content)
+        # Generate a response with the updated messages list
+        answer = chat_model(messages)
+        print(answer.content)
+        await event.respond(answer.content)
 
 client.run_until_disconnected()
