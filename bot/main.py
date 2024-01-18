@@ -6,10 +6,10 @@ from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain_community.chat_models import ChatOllama
 
-api_id = 'api_id'
-api_hash = 'api_hash'
-bot_token = 'bot_token'
-ollama_api_endpoint = os.getenv('OLLAMA_API_ENDPOINT') or 'http://localhost:11434'
+api_id = os.getenv('API_ID')
+api_hash = os.getenv('API_HASH')
+bot_token = os.getenv('BOT_TOKEN')
+ollama_api_endpoint = os.getenv('OLLAMA_API_ENDPOINT') or 'http://ollama-server:11434'
 
 # Create the client and connect
 client = TelegramClient('bot', api_id, api_hash).start(bot_token=bot_token)
