@@ -9,4 +9,4 @@ services:
     image: ollama/ollama:latest
     container_name: ollama-server
     volumes:
-      - ~/.ollama:/root/.ollama
+      - /usr/share/ollama/.ollama/models:/root/.ollama
