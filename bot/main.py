@@ -17,7 +17,7 @@ client = TelegramClient('bot', api_id, api_hash).start(bot_token=bot_token)
 
 # Initialize the Ollama object with the API endpoint and model name
 chat_model = ChatOllama(
-    model="phi",
+    model="dolphin-phi",
     base_url=ollama_api_endpoint
 )
 
