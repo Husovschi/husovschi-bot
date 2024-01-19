@@ -35,9 +35,13 @@ async def handler(event):
         message_text = event.message.message
 
     if message_text:
+        with open("prompt.txt", "r") as file:
+            prompt = file.read()
+        prompt = prompt.replace("USER_TEXT", message_text)
+
         # Create a HumanMessage object for the new message
         new_message = HumanMessage(
-            content=message_text
+            content=prompt
         )
 
         # Append the new HumanMessage object to the messages list
