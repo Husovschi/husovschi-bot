@@ -24,6 +24,7 @@ chat_model = ChatOllama(
 messages = []
 @client.on(events.NewMessage(chats=None))
 async def handler(event):
+    message_text = ''
     if event.is_group:  # Check if its in  a group
         if event.message.mentioned:  # Check if the bot is mentioned
         # Remove the bot's mention from the message
@@ -32,6 +33,8 @@ async def handler(event):
             message_text = message_text.replace(f"@{bot_username}", "").strip()
     else:
         message_text = event.message.message
+
+    if message_text:
         # Create a HumanMessage object for the new message
         new_message = HumanMessage(
             content=message_text
