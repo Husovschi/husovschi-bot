@@ -24,11 +24,12 @@ chat_model = ChatOllama(
 messages = []
 @client.on(events.NewMessage(chats=None))
 async def handler(event):
-    if event.is_group and event.message.mentioned:  # Check if the bot is mentioned
+    if event.is_group:  # Check if its in  a group
+        if event.message.mentioned:  # Check if the bot is mentioned
         # Remove the bot's mention from the message
-        message_text = event.message.message
-        bot_username = (await client.get_me()).username
-        message_text = message_text.replace(f"@{bot_username}", "").strip()
+            message_text = event.message.message
+            bot_username = (await client.get_me()).username
+            message_text = message_text.replace(f"@{bot_username}", "").strip()
     else:
         message_text = event.message.message
         # Create a HumanMessage object for the new message
