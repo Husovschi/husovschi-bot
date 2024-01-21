@@ -1,9 +1,8 @@
 import os
+import json
 from telethon import TelegramClient, events
 
 from langchain.schema import HumanMessage
-from langchain.callbacks.manager import CallbackManager
-from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain_community.chat_models import ChatOllama
 
 api_id = os.getenv('API_ID')
@@ -21,12 +20,16 @@ chat_model = ChatOllama(
     base_url=ollama_api_endpoint
 )
 
+f = open('whitelist.json')
+white_list = json.load(f)
+f.close()
+
 messages = []
 @client.on(events.NewMessage(chats=None))
 async def handler(event):
     message_text = ''
     if event.is_group:  # Check if its in  a group
-        if event.message.mentioned:  # Check if the bot is mentioned
+        if event.message.mentioned and (str(event.chat_id) in white_list['group_ids']):  # Check if the bot is mentioned
         # Remove the bot's mention from the message
             message_text = event.message.message
             bot_username = (await client.get_me()).username
