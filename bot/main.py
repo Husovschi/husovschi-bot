@@ -1,11 +1,11 @@
 import os
 import json
+import re
 from telethon import TelegramClient, events
 
-from langchain.schema import HumanMessage
-from langchain_community.chat_models import ChatOllama
+from ollama import AsyncClient
 
-api_id = os.getenv('API_ID')
+api_id = int(os.getenv('API_ID'))
 api_hash = os.getenv('API_HASH')
 bot_token = os.getenv('BOT_TOKEN')
 ollama_api_endpoint = os.getenv('OLLAMA_API_ENDPOINT') or 'http://ollama-server:11434'
@@ -13,24 +13,17 @@ ollama_api_endpoint = os.getenv('OLLAMA_API_ENDPOINT') or 'http://ollama-server:
 # Create the client and connect
 client = TelegramClient('bot', api_id, api_hash).start(bot_token=bot_token)
 
-
-# Initialize the Ollama object with the API endpoint and model name
-chat_model = ChatOllama(
-    model="dolphin-phi",
-    base_url=ollama_api_endpoint
-)
-
 f = open('whitelist.json')
 white_list = json.load(f)
 f.close()
 
-messages = []
+
 @client.on(events.NewMessage(chats=None))
 async def handler(event):
     message_text = ''
     if event.is_group:  # Check if its in  a group
         if event.message.mentioned and (str(event.chat_id) in white_list['group_ids']):  # Check if the bot is mentioned
-        # Remove the bot's mention from the message
+            # Remove the bot's mention from the message
             message_text = event.message.message
             bot_username = (await client.get_me()).username
             message_text = message_text.replace(f"@{bot_username}", "").strip()
@@ -41,18 +34,20 @@ async def handler(event):
         with open("prompt.txt", "r") as file:
             prompt = file.read()
         prompt = prompt.replace("USER_TEXT", message_text)
+        answer = ""
+        m = None
+        async for part in await AsyncClient().chat(model='dolphin-phi',
+                                                   messages=[{'role': 'user', 'content': prompt}],
+                                                   stream=True,
+                                                   ):
+            if part['message']['content']:
+                answer += part['message']['content']
+                if m is not None:
+                    if re.search(r'[,.]', part['message']['content']):
+                        await client.edit_message(m, answer)
+                else:
+                    m = await event.reply(message=answer)
+        await client.edit_message(m, answer)
 
-        # Create a HumanMessage object for the new message
-        new_message = HumanMessage(
-            content=prompt
-        )
-
-        # Append the new HumanMessage object to the messages list
-        messages.append(new_message)
-
-        # Generate a response with the updated messages list
-        answer = chat_model(messages)
-        print(answer.content)
-        await event.respond(answer.content)
 
 client.run_until_disconnected()
