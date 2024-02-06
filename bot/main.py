@@ -43,7 +43,7 @@ async def handler(event):
             if part['message']['content']:
                 answer += part['message']['content']
                 if m is not None:
-                    if re.search(r'[,.]', part['message']['content']):
+                    if re.search(r'[,.!?]', part['message']['content']):
                         await client.edit_message(m, answer)
                 else:
                     m = await event.reply(message=answer)
