@@ -37,7 +37,7 @@ async def handler(event):
         answer = ""
         m = None
         async for part in await (AsyncClient(host=ollama_api_endpoint)
-                .chat(model='dolphin-phi',
+                .chat(model='tinyllama',#tinyllama  dolphin-phi
                       messages=[{'role': 'user', 'content': prompt}],
                       stream=True,
                       )):
@@ -45,9 +45,10 @@ async def handler(event):
                 answer += part['message']['content']
                 if m is not None:
                     if re.search(r'[,.!?]', part['message']['content']):
-                        await client.edit_message(m, answer)
+                        m = await client.edit_message(m, answer)
                 else:
                     m = await event.reply(message=answer)
-
+        if m.message != answer:
+            await client.edit_message(m, answer)
 
 client.run_until_disconnected()
