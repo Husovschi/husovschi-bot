@@ -2,3 +2,4 @@ requests
 telethon
 langchain
 langchain-community
+ollama
