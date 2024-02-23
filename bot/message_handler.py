@@ -36,6 +36,6 @@ class MessageHandler:
                 await self.telegram_client.edit_message(m, answer)
 
     async def ollama_chat(self, prompt):
-        chat_result = await self.ollama_client.chat(model='tinyllama', messages=[{'role': 'user', 'content': prompt}], stream=True)
+        chat_result = await self.ollama_client.chat(messages=[{'role': 'user', 'content': prompt}], stream=True)
         async for part in await chat_result:
             yield part
