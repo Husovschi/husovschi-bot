@@ -55,9 +55,10 @@ class MessageHandler:
                 message_text = event.message.message.replace(f"@{bot_username}", "").strip()
 
         if message_text:
-            with open("prompt.txt", "r") as file:
-                prompt = file.read()
-            prompt = prompt.replace("USER_TEXT", message_text)
+            # with open("prompt.txt", "r") as file:
+            #     prompt = file.read()
+            # prompt = prompt.replace("USER_TEXT", message_text)
+            prompt = message_text
             answer = ""
             m = None
 
