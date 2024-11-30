@@ -1,12 +1,6 @@
 services:
   telegram-bot:
     build: .
+    env_file: .env
     environment:
-      - TELEGRAM_BOT_TOKEN=<replace with your token>
-      - OLLAMA_API_ENDPOINT=http://ollama-server:11434
-
-  ollama-server:
-    image: ollama/ollama:latest
-    container_name: ollama-server
-    volumes:
-      - /usr/share/ollama/.ollama:/root/.ollama
+      - OLLAMA_API_ENDPOINT=http://100.88.59.34:11434
