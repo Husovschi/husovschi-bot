@@ -50,7 +50,8 @@ class MessageHandler:
     async def handle_text_message(self, event):
         message_text = event.message.message if not event.is_group else ""
         if event.is_group:
-            if event.message.mentioned and (str(event.chat_id) in self.whitelist_manager.whitelist['group_ids']):
+            # if event.message.mentioned and (str(event.chat_id) in self.whitelist_manager.whitelist['group_ids']):
+            if event.message.mentioned: 
                 bot_username = (await self.telegram_client.get_me()).username
                 message_text = event.message.message.replace(f"@{bot_username}", "").strip()
 
