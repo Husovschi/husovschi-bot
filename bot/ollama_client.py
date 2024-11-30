@@ -4,7 +4,7 @@ class OllamaClient:
     def __init__(self, host=None):
         self.host = host or 'http://ollama-server:11434'
 
-    async def chat(self, model='llava:7b', messages=[], stream=False):
+    async def chat(self, model='llama3.2-vision:11b', messages=[], stream=False):
         try:
             return (AsyncClient(host=self.host)
                     .chat(model=model, messages=messages, stream=stream))
